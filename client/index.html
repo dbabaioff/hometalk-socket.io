@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+    <title>Hometalk Game - Socket.io</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-3.0.0.js"></script>
+</head>
+<body>
+    <script>
+        var socket   = io(),
+            USER_ID = null;
+
+        socket.on('connection', function() {
+            socket.on('userId', function(message) {
+                USER_ID = message.userId;
+                alert(USER_ID);
+            });
+        });
+
+        $(function() {
+            $(document).mousemove(function(event) {
+                socket.emit('mousemove', {userId: USER_ID, mouse: {x: event.clientX, y: event.clientY}});
+            });
+        });
+    </script>
+</body>
+</html>
