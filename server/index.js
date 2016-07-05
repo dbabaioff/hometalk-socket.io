@@ -7,14 +7,24 @@ app.get('/', function(req, res){
     res.sendFile(path.resolve('../client/index.html'));
 });
 
-var USERS  = {};
-var userId = 0;
+var players  = [];
+var playerId = 0;
 
 io.on('connection', function(socket) {
-    socket.emit('userId', {userId: userId++});
+    socket.on('new_player', function(data) {
+        players[playerId] = {
+            id: socket.id,
+            pos: {
+                x: 0, y: 0
+            }
+        };
+        playerId++;
 
-    socket.on('mousemove', function(message) {
-        console.log(message);
+        io.emit('players_data', players);
+    });
+
+    socket.on('player_move', function(data) {
+        console.log(data);
     });
 });
 

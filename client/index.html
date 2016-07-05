@@ -7,19 +7,23 @@
 </head>
 <body>
     <script>
-        var socket   = io(),
-            USER_ID = null;
+        var socket = io();
 
         socket.on('connection', function() {
-            socket.on('userId', function(message) {
-                USER_ID = message.userId;
-                alert(USER_ID);
+            alert('t');
+
+            socket.emit('new_player', {});
+
+            socket.on('players_data', function(data) {
+                console.log(data);
             });
         });
 
+
+
         $(function() {
             $(document).mousemove(function(event) {
-                socket.emit('mousemove', {userId: USER_ID, mouse: {x: event.clientX, y: event.clientY}});
+                socket.emit('player_move', {pos: {x: event.pageX, y: event.pageY}});
             });
         });
     </script>
