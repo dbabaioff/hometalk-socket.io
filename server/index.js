@@ -12,20 +12,37 @@ var playerId = 0;
 
 io.on('connection', function(socket) {
     socket.on('new_player', function(data) {
-        players[playerId] = {
-            id: socket.id,
-            pos: {
-                x: 0, y: 0
-            }
-        };
+        console.log('NEW PLAYER');
+
+        data.id = socket.id;
+
+        players[playerId] = data;
         playerId++;
+
+        io.emit('players_data', players);
+    })
+
+    socket.on('player_move', function(data) {
+        for (var i = 0, length = players.length; i < length; i++) {
+            if (players[i].id === socket.id) {
+                players[i].x = data.pos.x;
+                players[i].y = data.pos.y;
+
+                console.log('Client: ' + socket.id + ' | X: ' + data.pos.x + ' Y: ' + data.pos.y);
+                break;
+            }
+        }
 
         io.emit('players_data', players);
     });
 
-    socket.on('player_move', function(data) {
-        console.log(data);
-    });
+    // socket.on('disconnect', function() {
+    //     for (var index = 0, length = players.length; index < length; index++) {
+    //         if (players[index].id === socket.id) {
+    //             players.splice(index, 1);
+    //         }
+    //     }
+    // });
 });
 
 http.listen(3000, function(){

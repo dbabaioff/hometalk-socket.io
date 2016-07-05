@@ -4,22 +4,30 @@
     <title>Hometalk Game - Socket.io</title>
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-3.0.0.js"></script>
+    <style>
+        .player {width: 20px; height: 20px; position: absolute}
+    </style>
 </head>
 <body>
     <script>
-        var socket = io();
+        var socket = io(),
+            $body  = $('body'),
+            player = {
+                pos: {
+                    x: 0, y: 0
+                }
+            };
 
-        socket.on('connection', function() {
-            alert('t');
+        socket.emit('new_player', player);
 
-            socket.emit('new_player', {});
+        socket.on('players_data', function(data) {
+            $('body').html('');
 
-            socket.on('players_data', function(data) {
-                console.log(data);
-            });
+            for (var i = 0, length = data.length; i < length; i++) {
+                var player = '<div class="player" style="left:' + (data[i].x || 0) + 'px; top:' + (data[i].y || 0) +'px">PLAYER</div>';
+                $('body').append(player);
+            }
         });
-
-
 
         $(function() {
             $(document).mousemove(function(event) {
