@@ -34,7 +34,7 @@ io.on('connection', function(socket) {
                 players[i].x = data.pos.x;
                 players[i].y = data.pos.y;
 
-                // console.log('Client: ', data);
+                console.log('Client: ', data);
                 break;
             }
         }
