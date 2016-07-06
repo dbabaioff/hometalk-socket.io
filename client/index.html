@@ -5,14 +5,15 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-3.0.0.js"></script>
     <style>
-        body {
-            /*background-color: #5C94FC;*/
-        }
-
-        .player {width: 20px; height: 20px; position: absolute}
+        body {/*background-color: #5C94FC;*/ overflow: hidden}
+        .player {width: 100%; height: 100%; position: absolute}
+        .enemy {width: 100%; height: 100%; position:fixed; background: transparent url(/images/sponge_bob.png) no-repeat}
     </style>
 </head>
 <body>
+    <div class="enemy enemy_1"></div>
+    <div class="enemy enemy_2"></div>
+    <div class="enemy enemy_3"></div>
     <script>
         var socket = io(),
             $body  = $('body'),
@@ -20,16 +21,17 @@
                 pos: {
                     x: 0, y: 0
                 },
-                color: getRandomColor()
-            };
+                name: getPlayerName()
+            },
+            ENEMIES_COUNT = 3;
 
         socket.emit('new_player', player);
 
         socket.on('players_data', function(data) {
-            $body.html('');
+            $('.player').remove();
 
             for (var i = 0, length = data.length; i < length; i++) {
-                var player = '<div class="player" style="width: 35px; height: 35px; background-color: ' + data[i].color + '; left:' + (data[i].x || 0) + 'px; top:' + (data[i].y || 0) +'px"></div>';
+                var player = '<div class="player" style="background: transparent url(' + getPlayerImg(data[i].name) + ') no-repeat; left:' + (data[i].x || 0) + 'px; top:' + (data[i].y || 0) +'px"></div>';
                 $body.append(player);
             }
         });
@@ -38,16 +40,62 @@
             $(document).mousemove(function(event) {
                 socket.emit('player_move', {pos: {x: event.pageX, y: event.pageY}});
             });
+
+            animateEnemies();
         });
 
-        function getRandomColor() {
-            var letters = '0123456789ABCDEF'.split('');
-            var color = '#';
-            for (var i = 0; i < 6; i++ ) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
+        function getPlayerName() {
+            var playerNames = ['darth_vader', 'homer_simpson', 'super_mario'];
+
+            return playerNames[Math.floor(Math.random() * playerNames.length)];
         }
+
+        function getPlayerImg(name) {
+            return '/images/' + name + '.png';
+        }
+
+        function makeNewPosition() {
+            // Get viewport dimensions (remove the dimension of the div)
+            var h = $(window).height() - 50;
+            var w = $(window).width() - 50;
+
+            var nh = Math.floor(Math.random() * h);
+            var nw = Math.floor(Math.random() * w);
+
+            return [nh, nw];
+        }
+
+        function animateEnemies() {
+            for (var i = 0; i <= ENEMIES_COUNT; i++) {
+                var newPos = makeNewPosition();
+                $('.enemy_' + i).animate({top: newPos[0], left: newPos[1]}, function(){
+                    animateEnemies();
+                });
+            }
+        }
+
+        var overlaps = (function () {
+            function getPositions( elem ) {
+                var pos, width, height;
+                pos = $( elem ).position();
+                width = $( elem ).width() / 2;
+                height = $( elem ).height();
+                return [ [ pos.left, pos.left + width ], [ pos.top, pos.top + height ] ];
+            }
+
+            function comparePositions( p1, p2 ) {
+                var r1, r2;
+                r1 = p1[0] < p2[0] ? p1 : p2;
+                r2 = p1[0] < p2[0] ? p2 : p1;
+                return r1[1] > r2[0] || r1[0] === r2[0];
+            }
+
+            return function ( a, b ) {
+                var pos1 = getPositions( a ),
+                        pos2 = getPositions( b );
+                return comparePositions( pos1[0], pos2[0] ) && comparePositions( pos1[1], pos2[1] );
+            };
+        })();
     </script>
 </body>
 </html>
