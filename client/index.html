@@ -5,6 +5,10 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="http://code.jquery.com/jquery-3.0.0.js"></script>
     <style>
+        body {
+            /*background-color: #5C94FC;*/
+        }
+
         .player {width: 20px; height: 20px; position: absolute}
     </style>
 </head>
@@ -15,17 +19,18 @@
             player = {
                 pos: {
                     x: 0, y: 0
-                }
+                },
+                color: getRandomColor()
             };
 
         socket.emit('new_player', player);
 
         socket.on('players_data', function(data) {
-            $('body').html('');
+            $body.html('');
 
             for (var i = 0, length = data.length; i < length; i++) {
-                var player = '<div class="player" style="left:' + (data[i].x || 0) + 'px; top:' + (data[i].y || 0) +'px">PLAYER</div>';
-                $('body').append(player);
+                var player = '<div class="player" style="width: 35px; height: 35px; background-color: ' + data[i].color + '; left:' + (data[i].x || 0) + 'px; top:' + (data[i].y || 0) +'px"></div>';
+                $body.append(player);
             }
         });
 
@@ -34,6 +39,15 @@
                 socket.emit('player_move', {pos: {x: event.pageX, y: event.pageY}});
             });
         });
+
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF'.split('');
+            var color = '#';
+            for (var i = 0; i < 6; i++ ) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
     </script>
 </body>
 </html>
